@@ -2,6 +2,8 @@ import { sendGet } from "./httpService";
 
 const urlBase = "https://api.rawg.io/api";
 const apiKey = "c542e67aec3a4340908f9de9e86038af";
+
+// Tipo que define los parámetros de filtro para las consultas
 type filterParams = {
   search?: string;
   ordering?: string;
@@ -14,6 +16,7 @@ type filterParams = {
   publishers?: string;
 };
 
+// Función para obtener una lista de juegos con filtros opcionales
 export const getGames = async (filterParams?: filterParams) => {
   try {
     const queryString = filterParams
@@ -33,6 +36,7 @@ export const getGames = async (filterParams?: filterParams) => {
   }
 };
 
+// Función para obtener la lista de plataformas
 export const getPlataform = async () => {
   try {
     const response = await sendGet(`${urlBase}/platforms?key=${apiKey}`);
@@ -42,6 +46,7 @@ export const getPlataform = async () => {
   }
 };
 
+// Función para obtener la lista de géneros
 export const getGenres = async () => {
   try {
     const response = await sendGet(`${urlBase}/genres?key=${apiKey}`);
@@ -51,6 +56,7 @@ export const getGenres = async () => {
   }
 };
 
+// Función para obtener la lista de tags
 export const getTags = async () => {
   try {
     const response = await sendGet(`${urlBase}/tags?key=${apiKey}`);
@@ -60,6 +66,7 @@ export const getTags = async () => {
   }
 };
 
+// Función para obtener la lista de publishers
 export const getPublishers = async () => {
   try {
     const response = await sendGet(`${urlBase}/publishers?key=${apiKey}`);
@@ -69,6 +76,7 @@ export const getPublishers = async () => {
   }
 };
 
+// Función para obtener los detalles de un juego por su ID
 export const getGameById = async (id: string) => {
   try {
     const response = await sendGet(`${urlBase}/games/${id}?key=${apiKey}`);
