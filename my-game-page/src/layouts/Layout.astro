@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>SpGames</title>
+  </head>
+  <body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+    <div class="py-4 px-4 mx-auto max-w-screen-xl text-center">
+      <div class="mx-auto lg:gap-12 lg:grid-cols-12">
+        <h2
+          class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white"
+        >
+          SP GAMES
+        </h2>
+        <p class="font-light text-gray-500 sm:text-xl dark:text-gray-400">
+          Explora la colección de juegos disponibles
+        </p>
+      </div>
+    </div>
+    <slot />
+  </body>
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</html>

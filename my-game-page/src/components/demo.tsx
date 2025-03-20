@@ -1,0 +1,335 @@
+import React, { useEffect, useState } from "react";
+import {
+  getGames,
+  getGenres,
+  getPlataform,
+  getPublishers,
+  getTags,
+} from "../services/rawgApiService";
+import LoadingSpinner from "../loading/loading";
+import { initFlowbite } from "flowbite";
+
+const Demo = () => {
+  const [games, setGames] = useState([]);
+  const [genres, setGenres] = useState([]);
+  const [platforms, setPlatforms] = useState([]);
+  const [tags, setTags] = useState([]);
+  const [publisher, setPublisher] = useState([]);
+  const [selectedGenre, setSelectedGenre] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedPlatform, setSelectedPlatform] = useState("");
+  const [selectedTags, setSelectedTags] = useState("");
+  const [selectedPublisher, setSelectedPublisher] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    initFlowbite();
+    setLoading(true);
+
+    fetchGames();
+    fetchFilters();
+    setLoading(false);
+  }, [currentPage]);
+
+  const fetchGames = () => {
+    const filters: any = {
+      page: currentPage,
+      genres: selectedGenre,
+      dates: selectedYear ? `${selectedYear}-01-01,${selectedYear}-12-31` : "",
+      platforms: selectedPlatform,
+      tags: selectedTags,
+      publishers: selectedPublisher,
+    };
+
+    getGames(filters).then((data) => {
+      setGames(data.results);
+      console.log(data);
+      setTotalPages(data.count ? Math.ceil(data.count / 10) : 1); // Ajusta según el tamaño de página
+    });
+  };
+
+  const fetchFilters = () => {
+    getGenres().then((data) => {
+      setGenres(data.results);
+    });
+
+    getPlataform().then((data) => {
+      setPlatforms(data.results);
+    });
+
+    getTags().then((data) => {
+      setTags(data.results);
+    });
+
+    getPublishers().then((data) => {
+      setPublisher(data.results);
+    });
+  };
+
+  const applyFilters = () => {
+    setCurrentPage(1);
+    fetchGames();
+  };
+
+  const clearFilters = () => {
+    setSelectedGenre("");
+    setSelectedYear("");
+    setSelectedPlatform("");
+    setSelectedTags("");
+    setSelectedPublisher("");
+    setCurrentPage(1);
+    fetchGames();
+  };
+
+  const searchByName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    getGames({ search: value }).then((data) => {
+      setGames(data.results);
+    });
+  };
+
+  const filterByGenre = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+
+    setSelectedGenre(value);
+  };
+
+  const filterByDate = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const year = e.target.value;
+
+    setSelectedYear(year); // Actualiza el estado del año seleccionado
+  };
+
+  const yearsDrop = Array.from({ length: 72 }, (_, i) => 1954 + i); // Rango: 1954 - 2025
+
+  const filterByPlatforms = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const platform = e.target.value;
+
+    setSelectedPlatform(platform);
+  };
+
+  const filterByTags = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const tag = e.target.value;
+
+    setSelectedTags(tag);
+  };
+
+  const filterByPublishers = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const publisher = e.target.value;
+
+    setSelectedPublisher(publisher);
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const getPaginationRange = () => {
+    const start = Math.max(1, currentPage - 5);
+    const end = Math.min(totalPages, currentPage + 5);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  return (
+    <>
+      <section className="bg-blend-luminosity bg-white dark:bg-gray-900">
+        <div className="px-4 mx-auto max-w-screen-xl text-center">
+          <div className="fixed top-0 left-0 z-40 w-64 h-screen transition-transform translate-x-0">
+            <div className="h-full px-3 py-4 overflow-y-auto bg-slate-900 dark:bg-gray-800">
+              <h3 className="mb-4 text-xl font-bold text-white dark:text-white">
+                Filtros
+              </h3>
+              <div className="space-y-4">
+                {/* Filtro de géneros */}
+                <select
+                  id="genres"
+                  value={selectedGenre}
+                  onChange={filterByGenre}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                >
+                  <option value="" disabled hidden>
+                    Selecciona un género
+                  </option>
+                  {genres.map((item: any, index) => (
+                    <option key={index} value={item.slug}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  id="dates"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  value={selectedYear}
+                  onChange={filterByDate}
+                >
+                  <option value="" disabled hidden>
+                    Escoge un año
+                  </option>
+                  {yearsDrop.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  id="platforms"
+                  value={selectedPlatform}
+                  onChange={filterByPlatforms}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                >
+                  <option value="" disabled hidden>
+                    Selecciona una Plataforma
+                  </option>
+                  {platforms.map((item: any, index) => (
+                    <option key={index} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  id="tags"
+                  value={selectedTags}
+                  onChange={filterByTags}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                >
+                  <option value="" disabled hidden>
+                    Selecciona un tag
+                  </option>
+                  {tags.map((item: any, index) => (
+                    <option key={index} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  id="publisher"
+                  value={selectedPublisher}
+                  onChange={filterByPublishers}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                >
+                  <option value="" disabled hidden>
+                    Selecciona una empresa
+                  </option>
+                  {publisher.map((item: any, index) => (
+                    <option key={index} value={item.slug}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={applyFilters}
+                    className="bg-blue-500 text-white py-2 rounded hover:bg-blue-700"
+                  >
+                    Aplicar filtros
+                  </button>
+                  <button
+                    onClick={clearFilters}
+                    className="bg-blue-500 text-white py-2 rounded hover:bg-blue-700"
+                  >
+                    Borrar filtros
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="relative">
+            <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+              <svg
+                className="w-4 h-4 text-gray-500 dark:text-gray-400"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                />
+              </svg>
+            </div>
+            <input
+              type="search"
+              id="default-search"
+              onChange={searchByName}
+              className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Busca tus juegos preferidos"
+              required
+            />
+          </div>
+          {/* Contenedor de la cuadricula */}
+          <div className="grid py-4 gap-16 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {games.map((item: any, index) => (
+              <div key={index} className="text-center text-gray-500">
+                <a href={`/${item.id}`}>
+                  <img
+                    className="mx-auto mb-4 w-50 h-50 rounded-lg"
+                    src={item.background_image}
+                    alt={item.name}
+                  />
+                  <h5 className="mb-1 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                    {item.name}
+                  </h5>
+                  <span>CEO/Co-founder</span>
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="flex items-center justify-center py-8">
+          <nav aria-label="Page navigation example">
+            <ul className="inline-flex -space-x-px text-sm">
+              <li>
+                <a
+                  href="#"
+                  className="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                >
+                  Previous
+                </a>
+              </li>
+              {getPaginationRange().map((page) => (
+                <li key={page}>
+                  <button
+                    type="button"
+                    className={`flex items-center justify-center px-3 h-8 leading-tight ${
+                      currentPage === page
+                        ? "text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
+                        : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                    }`}
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {page}
+                  </button>
+                </li>
+              ))}
+              <li>
+                <button
+                  type="button"
+                  className="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                >
+                  Next
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </section>
+    </>
+  );
+};
+
+export default Demo;

@@ -1,0 +1,10 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import GameInfoId from "../../components/game";
+
+const { gameId } = Astro.params;
+---
+
+<Layout>
+  <GameInfoId client:only="react" gameId={gameId} />
+</Layout>
