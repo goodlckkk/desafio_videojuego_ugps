@@ -24,7 +24,6 @@ const mainPage = () => {
   const [searchTerm, setSearchTerm] = useState(""); // Nuevo estado para el término de búsqueda
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
 
   // useEffect para inicializar Flowbite y cargar juegos y filtros al montar el componente
   useEffect(() => {
@@ -43,7 +42,6 @@ const mainPage = () => {
 
   // Función para obtener juegos aplicando los filtros
   const fetchGames = () => {
-    setLoading(true);
     const filters: any = {
       page: currentPage,
       genres: selectedGenre,
@@ -58,20 +56,17 @@ const mainPage = () => {
       setGames(data.results);
       console.log(data);
       setTotalPages(data.count ? Math.ceil(data.count / 10) : 1); // Ajusta según el tamaño de página
-      setLoading(false);
     });
   };
 
   // Función para obtener los datos de los filtros
   const fetchFilters = () => {
-    setLoading(true);
     Promise.all([getGenres(), getPlataform(), getTags(), getPublishers()]).then(
       ([genresData, platformsData, tagsData, publishersData]) => {
         setGenres(genresData.results);
         setPlatforms(platformsData.results);
         setTags(tagsData.results);
         setPublisher(publishersData.results);
-        setLoading(false);
       }
     );
   };
@@ -141,11 +136,6 @@ const mainPage = () => {
     const end = Math.min(totalPages, currentPage + 5);
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
-
-  // Mostrar el spinner de carga mientras se cargan los datos
-  if (loading) {
-    return <LoadingSpinner />;
-  }
 
   return (
     <>
